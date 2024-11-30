@@ -110,11 +110,13 @@ class SearchAgent(Agent):
         state: a GameState object (pacman.py)
         """
         if self.searchFunction == None: raise Exception("No search function provided for SearchAgent")
-        starttime = time.time()
+        start_time = time.perf_counter()
         problem = self.searchType(state) # Makes a new search problem
         self.actions  = self.searchFunction(problem) # Find a path
         totalCost = problem.getCostOfActions(self.actions)
-        print('Path found with total cost of %d in %.1f seconds' % (totalCost, time.time() - starttime))
+        end_time = time.perf_counter()
+        time_taken = end_time - start_time
+        print('Path found with total cost of %d in %.6f seconds' % (totalCost, time_taken))
         if '_expanded' in dir(problem): print('Search nodes expanded: %d' % problem._expanded)
 
     def getAction(self, state):
