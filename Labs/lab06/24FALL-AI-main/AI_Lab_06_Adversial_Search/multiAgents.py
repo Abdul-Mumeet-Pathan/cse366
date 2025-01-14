@@ -194,16 +194,67 @@ class MinimaxAgent(MultiAgentSearchAgent):
         return best_action, best_score  # Return the best_action and best_score
     
 class AlphaBetaAgent(MultiAgentSearchAgent):
-    """
-      Your minimax agent with alpha-beta pruning (question 3)
-    """
-
+  
     def getAction(self, gameState):
         """
           Returns the minimax action using self.depth and self.evaluationFunction
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        action, _ = self.alphaBeta(0, 0, gameState, float('-inf'), float('inf'))
+        return action
+
+    def alphaBeta(self, curr_depth, agent_index, gameState, alpha, beta):
+   
+
+    
+        # Roll over agent index and increment depth if all agents have played their turn
+        if agent_index >= gameState.getNumAgents():
+            agent_index = 0
+            curr_depth += 1
+
+        # Terminal condition: Max depth reached or no legal actions available
+        if curr_depth == self.depth or not gameState.getLegalActions(agent_index):
+            return None, self.evaluationFunction(gameState)
+
+        if agent_index == 0:  # Pacman (maximizer)
+            return self.maxValue(curr_depth, agent_index, gameState, alpha, beta)
+        else:  # Ghosts (minimizers)
+            return self.minValue(curr_depth, agent_index, gameState, alpha, beta)
+
+    def maxValue(self, curr_depth, agent_index, gameState, alpha, beta):
+        best_score = float('-inf')
+        best_action = None
+
+        for action in gameState.getLegalActions(agent_index):
+            next_game_state = gameState.generateSuccessor(agent_index, action)
+            _, score = self.alphaBeta(curr_depth, agent_index + 1, next_game_state, alpha, beta)
+
+            if score > best_score:
+                best_score = score
+                best_action = action
+
+            alpha = max(alpha, best_score)
+            if beta <= alpha:  # Prune the branch
+                break
+
+        return best_action, best_score
+
+    def minValue(self, curr_depth, agent_index, gameState, alpha, beta):
+        best_score = float('inf')
+        best_action = None
+
+        for action in gameState.getLegalActions(agent_index):
+            next_game_state = gameState.generateSuccessor(agent_index, action)
+            _, score = self.alphaBeta(curr_depth, agent_index + 1, next_game_state, alpha, beta)
+
+            if score < best_score:
+                best_score = score
+                best_action = action
+
+            beta = min(beta, best_score)
+            if beta <= alpha:  # Prune the branch
+                break
+
+        return best_action, best_score
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """

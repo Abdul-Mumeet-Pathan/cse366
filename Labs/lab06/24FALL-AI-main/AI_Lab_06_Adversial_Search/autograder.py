@@ -14,7 +14,7 @@
 
 # imports from python standard library
 import grading
-import imp
+import importlib.util
 import optparse
 import os
 import re
@@ -120,17 +120,20 @@ def loadModuleString(moduleSource):
     #    ValueError: load_module arg#2 should be a file or None
     #
     #f = StringIO(moduleCodeDict[k])
-    #tmp = imp.load_module(k, f, k, (".py", "r", imp.PY_SOURCE))
-    tmp = imp.new_module(k)
-    exec(moduleCodeDict[k] in tmp.__dict__)
-    setModuleName(tmp, k)
+    spec = importlib.util.spec_from_loader(moduleSource, loader=None)
+    tmp = importlib.util.module_from_spec(spec)
+    exec(moduleCodeDict[moduleSource], tmp.__dict__)
+    exec(moduleCodeDict[moduleSource] in tmp.__dict__)
+    setModuleName(tmp, moduleSource)
     return tmp
 
 import py_compile
 
 def loadModuleFile(moduleName, filePath):
-    with open(filePath, 'r') as f:
-        return imp.load_module(moduleName, f, "%s.py" % moduleName, (".py", "r", imp.PY_SOURCE))
+    spec = importlib.util.spec_from_file_location(moduleName, filePath)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def readFile(path, root=""):
